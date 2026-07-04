@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cubiczan-eval"
+version = "0.1.0"
+description = "LLM-as-a-Judge evaluation + self-improvement loop: rubric schemas, pluggable judge, rolling-score prompt amendments, JSON/SQLite persistence, optional OpenInference tracing."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "cubiczan" }]
+keywords = ["llm-as-judge", "evaluation", "rubric", "self-improvement", "prompt-engineering", "observability"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Typing :: Typed",
+]
+dependencies = ["pydantic>=2.0"]
+
+[project.optional-dependencies]
+tracing = ["opentelemetry-sdk>=1.20", "httpx>=0.24"]
+dev = ["pytest>=7", "pytest-asyncio>=0.21", "mypy>=1.0"]
+
+[project.urls]
+Homepage = "https://github.com/icohangar-ops/cubiczan-eval"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cubiczan_eval"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_unused_ignores = true
