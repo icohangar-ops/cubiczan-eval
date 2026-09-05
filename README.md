@@ -115,6 +115,10 @@ asyncio.run(main())
   raises, needs no collector.
 - **`Tracer`** protocol: `with tracer.span(name, **attrs) as span: ...`.
 
+### PRISMtrace
+- Set `PRISMTRACE_API_KEY` and `PRISMTRACE_PROJECT_ID` to export judge and
+  improvement-cycle traces to BlockConvey.
+
 ## Running the tests offline
 
 No API keys required — tests inject stub scorers (the analogue of strata's

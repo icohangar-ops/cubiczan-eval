@@ -16,9 +16,11 @@ import inspect
 import json
 import logging
 import re
+from time import perf_counter
 from typing import Any, Awaitable, Callable, Union
 
 from cubiczan_eval.rubric import DimensionScore, EvalResult, Rubric
+from cubiczan_eval.prism import trace_prism_llm
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +100,7 @@ class LLMJudge:
         Returns:
             An :class:`EvalResult` with dimension scores and overall score.
         """
+        started = perf_counter()
         prompt = self.build_user_prompt(output, context)
         raw = await self._call(self._system_prompt, prompt)
 
@@ -125,6 +128,26 @@ class LLMJudge:
                 self._store.add_result(result)
             except Exception as exc:
                 logger.warning("Failed to store evaluation result: %s", exc)
+
+        trace_prism_llm(
+            agent_id=f"judge:{agent_name or 'unknown'}",
+            agent_name=agent_name or "cubiczan-eval",
+            model="judge",
+            input_messages=[
+                {"role": "system", "content": self._system_prompt},
+                {"role": "user", "content": prompt},
+            ],
+            output=json.dumps(
+                {
+                    "overall_score": result.overall_score,
+                    "scores": [s.to_dict() for s in scores],
+                },
+                ensure_ascii=True,
+            ),
+            latency_ms=int((perf_counter() - started) * 1000),
+            metadata={"item_id": item_id, "store": bool(store and self._store is not None)},
+            trace_id=item_id or f"judge-{agent_name}-{int(started * 1000)}",
+        )
 
         return result
 

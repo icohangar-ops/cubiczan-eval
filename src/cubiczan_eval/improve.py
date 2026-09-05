@@ -34,9 +34,11 @@ import logging
 import uuid
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
+from time import perf_counter
 from typing import Any
 
 from cubiczan_eval.judge import CompletionFn
+from cubiczan_eval.prism import trace_prism_llm
 from cubiczan_eval.tracker import (
     DEFAULT_MIN_EVALS,
     DEFAULT_THRESHOLD,
@@ -171,6 +173,7 @@ class SelfImprovementEngine:
         Returns:
             An :class:`ImprovementReport`.
         """
+        started = perf_counter()
         report = ImprovementReport()
 
         try:
@@ -204,6 +207,20 @@ class SelfImprovementEngine:
                 self._store.add_report(report.to_dict())
             except Exception as exc:
                 logger.warning("Failed to persist improvement report: %s", exc)
+
+        trace_prism_llm(
+            agent_id="cubiczan-eval",
+            agent_name="cubiczan-eval",
+            model="improvement-cycle",
+            input_messages=[
+                {"role": "system", "content": "Review recent evaluations and generate prompt amendments."},
+                {"role": "user", "content": str(len(report.flags))},
+            ],
+            output=str(report.to_dict()),
+            latency_ms=int((perf_counter() - started) * 1000),
+            metadata={"flags": len(report.flags), "amendments": len(report.amendments)},
+            trace_id=report.report_id,
+        )
 
         return report
 

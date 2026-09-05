@@ -31,7 +31,7 @@ Persistence
 
 Tracing (optional, no-op unless configured)
     :class:`Tracer`, :class:`NoOpTracer`, :class:`OTelTracer`,
-    :func:`get_tracer`.
+    :func:`get_tracer`, :func:`trace_prism_llm`.
 
 Everything works offline: inject a fake ``complete`` callable (or use a
 template-only :class:`SelfImprovementEngine`) and no API keys are required.
@@ -74,6 +74,7 @@ from cubiczan_eval.tracing import (
     Tracer,
     get_tracer,
 )
+from cubiczan_eval.prism import trace_prism_llm
 
 __version__ = "0.1.0"
 
@@ -112,6 +113,7 @@ __all__ = [
     "NoOpTracer",
     "OTelTracer",
     "get_tracer",
+    "trace_prism_llm",
     # amendment templates
     "DEFAULT_AMENDMENT_TEMPLATES",
 ]
